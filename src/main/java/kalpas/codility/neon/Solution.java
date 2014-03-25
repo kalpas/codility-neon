@@ -60,6 +60,91 @@ public class Solution {
         return maxDistance;
     }
 
+    public int solution2(int[] bollards, int boatHalfW, int wharfLength) {
+        int maxDistance = -1;
+        if (bollards.length * boatHalfW * 2 > wharfLength) {
+            return maxDistance;
+        }
+
+        int[] boats = new int[bollards.length];
+        for (int i = 0; i < boats.length; i++) {
+            boats[i] = (i * boatHalfW * 2) + boatHalfW;
+        }
+
+        int[] forces = forces(bollards, boats, boatHalfW, wharfLength);
+
+        int prevForce = 0;
+        int groupStart = 0, groupEnd = 0;
+        for (int i = 0; i < forces.length; i++) {
+            if (prevForce != 0) {
+                if (prevForce > 0 && forces[i] >= 0) {// ->->
+                    prevForce = forces[i]>prevForce?forces[i]:prevForce;
+                    continue;
+                } else if (prevForce <= 0 && forces[i] < 0) {// <-<-
+
+                } else if (prevForce > 0 && forces[i] <= 0) {// -><-
+                    int delta = prevForce + forces[i];
+                    //prevForce += forces[i];
+                    if (delta < -1) {
+                        groupEnd = i;
+                        if (canMoveLeft(groupStart, boats, boatHalfW)) {
+                            for (int j = groupStart; j <= groupEnd; j++) {
+                                boats[j] -= 1;
+                            }
+                        }
+                        groupStart = i + 1;
+                        continue;
+                    } else if (prevForce >= -1 && prevForce <= 0) {
+                        groupStart = i + 1;
+                        continue;
+                    } else {
+                        // TODO and what if next is -> ?
+                        continue;
+                    }
+
+                } else if (prevForce <= 0 && forces[i] > 0) { // <-->
+
+                } else {
+                    throw new IllegalStateException("WTF");
+                }
+            }
+
+        }
+
+        // for (int i = 0; i < boats.length; i++) {
+        // int distance = bollards[i] - boats[i];
+        // boolean moveRight = distance > 0;
+        //
+        // }
+
+        print(bollards, boatHalfW, wharfLength, boats);// TODO
+
+        return maxDistance;
+
+    }
+
+    private boolean canMoveLeft(int boat, int[] boats, int boatHalfW) {
+        boolean result = false;
+        if (boat == 0 && boats[boat] >= boatHalfW + 1) {
+            result = true;
+        } else if (boat == 0 && boats[boat] < boatHalfW + 1) {
+            result = false;
+        } else if (boats[boat] >= boats[boat - 1] + boatHalfW + 1) {
+            result = true;
+        } else {
+            result = false;
+        }
+        return result;
+    }
+
+    private int[] forces(int[] bollards, int[] boats, int boatHalfW, int wharfLength) {
+        int[] distances = new int[boats.length];
+        for (int i = 0; i < distances.length; i++) {
+            distances[i] = bollards[i] - boats[i];
+        }
+        return distances;
+    }
+
     private boolean move1step(int i, boolean left, int[] bollards, int[] boats, int boatHalfW, int wharfLength) {
         if (left) {
             if (i != 0) {
@@ -100,11 +185,13 @@ public class Solution {
         for (int i = 0; i <= wharfLength; i++) {
             if (bollard == i) {
                 System.out.print(i);
-                if (bollardI < bollards.length - 1) {
-                    bollard = bollards[++bollardI];
+                while (bollards[bollardI] == bollard && bollardI < bollards.length - 1) {
+                    bollardI++;
                 }
-            } else {
-                System.out.print("=");
+
+                bollard = bollards[bollardI];
+            } else if (i != 0) {
+                System.out.print(".");
             }
 
         }
@@ -119,8 +206,8 @@ public class Solution {
                 if (boatI < boats.length - 1) {
                     boat = boats[++boatI];
                 }
-            } else {
-                System.out.print("=");
+            } else if (i != 0) {
+                System.out.print(".");
             }
 
         }
