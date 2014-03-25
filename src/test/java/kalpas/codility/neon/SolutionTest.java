@@ -34,4 +34,16 @@ public class SolutionTest {
 
     }
 
+    @Test
+    public void testSolution3() {
+        int R[] = { 4, 7, 9, 11, 14, 21, 21, 22, 22, 23 };
+        int M = 37;
+        int X = 1;
+
+        Solution solution = new Solution();
+        int maxDistance = solution.solution(R, X, M);
+
+        assertEquals(3, maxDistance);
+
+    }
 }
